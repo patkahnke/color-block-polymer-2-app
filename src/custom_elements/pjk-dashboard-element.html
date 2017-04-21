@@ -1,0 +1,73 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/simple-timer/simple-timer.html">
+
+<!--
+`pjk-dashboard-element`
+all interaction and game state info for user
+-->
+
+<dom-module id="pjk-dashboard-element">
+  <template>
+    <style>
+      :host {
+      }
+      h1 {
+        font-size: 50px;
+        text-align: center;
+        margin-bottom: 50px;
+      }
+      #timer {
+        text-align: center;
+        font-size: 40px;
+        padding-bottom: 30px;
+      }
+      .quiz-message {
+        color: black;
+      }
+      .good-message {
+        color: green;
+      }
+      .bad-message {
+        color: red;
+      }
+    </style>
+
+    <div id="interaction">
+      <h1 id="message">[[message]]</h1>
+      <simple-timer id="timer" start-time="3"></simple-timer>
+      <span id="score">Total Points:<br>[[totalPoints]]</span>
+    </div>
+  </template>
+
+  <script>
+    class PjkDashboardElement extends Polymer.Element {
+      static get is() {
+        return 'pjk-dashboard-element';
+      }
+
+      static get properties() {
+        return {
+          gameState: {
+            type: String,
+            value: 'begin'
+          },
+          colorPicked: {
+            type: String,
+          },
+          message: {
+            type: String,
+          },
+          totalPoints: {
+            type: Number,
+            value: 0,
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+    }
+  }
+    window.customElements.define(PjkDashboardElement.is, PjkDashboardElement);
+  </script>
+</dom-module>

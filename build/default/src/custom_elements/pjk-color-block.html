@@ -1,0 +1,54 @@
+<html><head><link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`pjk-color-block`
+colored square
+-->
+
+</head><body><dom-module id="pjk-color-block" attributes="bgColor selected">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        width: 200px;
+        height: 200px;
+        border: solid 1px silver;
+      }
+      .bg-container {
+        width: inherit;
+        height: inherit;
+      }
+      .selected {
+        border: solid 5px black;
+      }
+    </style>
+
+    <div class="bg-container" style$="background-color: [[bgColor]]" on-click="_handleClick">
+    </div>
+  </template>
+
+  <script>
+    class PjkColorBlock extends Polymer.Element {
+      static get is() { return 'pjk-color-block'; }
+      static get properties() {
+        return {
+          bgColor: {
+            type: String,
+            value: 'red'
+          },
+        };
+      }
+
+      _handleClick() {
+        this.child().classList.add('selected');
+        console.log('this:', this);
+        console.log('this.classList:', this.classList);
+        console.log('this.child().classList:', this.child().classList);
+      }
+
+    }
+
+    window.customElements.define(PjkColorBlock.is, PjkColorBlock);
+  </script>
+</dom-module>
+</body></html>

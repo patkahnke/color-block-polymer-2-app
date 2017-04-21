@@ -1,0 +1,6 @@
+{
+  "name": "color-block-polymer-2-app",
+  "short_name": "color-block-polymer-2-app",
+  "start_url": "/",
+  "display": "standalone"
+}

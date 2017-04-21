@@ -1,0 +1,88 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!--
+`pjk-color-block`
+colored square
+-->
+
+<dom-module id="pjk-color-block-element" attributes="bgColor selected">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        border: solid 1px silver;
+        margin: 2px
+      }
+      .bg-container {
+        width: inherit;
+        height: inherit;
+      }
+      .selected {
+        border: solid 2px black;
+      }
+    </style>
+
+    <div  id="color-block"
+          class$=[[selected]]
+          style$="background-color: [[bgColor]]"
+          on-click="_handleClick">
+    </div>
+  </template>
+
+  <script>
+    class PjkColorBlockElement extends Polymer.Element {
+      static get is() {
+        return 'pjk-color-block-element';
+      }
+
+      static get properties() {
+        return {
+          bgColor: {
+            type: String,
+            value: 'green',
+            observer: '_colorChanged'
+          },
+          round: {
+            type: Number,
+            value: 1,
+            observer: '_roundChanged'
+          },
+          selected: {
+            type: String,
+            value: 'bg-container',
+            observer: '_selectedChanged'
+          },
+          selectionMade: {
+            type: String,
+            value: "false"
+          }
+        };
+      }
+
+      _colorChanged(newValue, oldValue) {}
+
+      _selectedChanged(newValue, oldValue) {}
+
+      _roundChanged(newValue, oldValue) {}
+
+      _handleClick(e) {
+        if (this.selectionMade === 'false') {
+        this.selected = 'bg-container selected';
+        this.dispatchEvent(new CustomEvent('getColor',
+          {
+            bubbles: true,
+            composed: true,
+            detail: {
+              color: this.bgColor
+            }
+          }));
+        return;
+      }
+    }
+  }
+
+    window.customElements.define(PjkColorBlockElement.is, PjkColorBlockElement);
+  </script>
+</dom-module>

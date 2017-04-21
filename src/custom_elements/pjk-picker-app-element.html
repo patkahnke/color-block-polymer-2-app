@@ -1,0 +1,227 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="/src/custom_elements/pjk-color-block-element.html">
+<link rel="import" href="/src/custom_elements/pjk-color-block-game-field-element.html">
+<link rel="import" href="/src/custom_elements/pjk-dashboard-element.html">
+
+<!--
+`pjk-picker-app-element`
+smart component for picker game
+-->
+
+<dom-module id="pjk-picker-app-element">
+  <template>
+    <style>
+    </style>
+
+    <div id="main">
+      <pjk-dashboard-element id="dashboard"></pjk-dashboard-element>
+      <pjk-color-block-game-field-element id="game-field"></pjk-color-block-game-field-element>
+    </div>
+  </template>
+
+  <script>
+    class PjkPickerAppElement extends Polymer.Element {
+      static get is() {
+        return 'pjk-picker-app-element';
+      }
+
+      static get properties() {
+        return {
+          playsPerRound: {
+            type: Number,
+            value: 10,
+          },
+          pointPenalty: {
+            type: Number,
+            value: 300,
+          },
+          totalPoints: {
+            type: Number,
+            value: 0,
+          },
+          numBlocks: {
+            type: Number,
+            value: 4,
+          },
+          currentRound: {
+            type: Number,
+            value: 0,
+          },
+          multiplier: {
+            type: Number,
+            value: 100,
+          },
+          pauseTime: {
+            type: Number,
+            value: 1500,
+          },
+          timePerQuestion: {
+            type: Number,
+            value: 3000,
+          },
+          messageText: String,
+          messageClass: String,
+          colorAsked: String,
+          pointsEarned: Number,
+          correct: Boolean,
+          outOfTime: {
+            type: Boolean,
+            value: false,
+          },
+        };
+      }
+
+      ready() {
+        super.ready();
+        let elems = {
+        app: this,
+        main: this.shadowRoot.getElementById('main'),
+        dashboard: this.shadowRoot.getElementById('dashboard'),
+        timer: this.shadowRoot.getElementById('dashboard').shadowRoot.getElementById('timer'),
+        message: this.shadowRoot.getElementById('dashboard').shadowRoot.getElementById('message'),
+        score: this.shadowRoot.getElementById('dashboard').shadowRoot.getElementById('score'),
+        gameField: this.shadowRoot.getElementById('game-field'),
+        gameFieldHTML: this.shadowRoot.getElementById('game-field').shadowRoot.childNodes[2],
+        baseGameElements: this.shadowRoot.getElementById('game-field').shadowRoot.childNodes[2].childNodes,
+        };
+
+        this._setUpGame(elems);
+      }
+
+      _setUpGame(elems) {
+        this._addColorsSetListener(elems);
+        this._addGetColorListener(elems);
+        this._addTimedOutListener(elems);
+        this._setGameField(elems);
+        this._startTimer(elems);
+      }
+
+      _addGetColorListener(elems) {
+        elems.gameField.addEventListener('getColor', function(e) {
+          let app = elems.app;
+          elems.timer.pause();
+          app._turnOffClick(elems);
+          app._judgeResponse(e);
+          app._getPointsEarned(elems);
+          app._setMessage(elems);
+          app._setTotalPoints(elems);
+          app._pauseAndReset(elems);
+          });
+      }
+
+      _addTimedOutListener(elems) {
+        document.addEventListener('timedOut' , function(e) {
+          elems.app._outOfTime(elems);
+        });
+      }
+
+      _addColorsSetListener(elems) {
+        document.addEventListener('colorsSet', function(e) {
+          let app = elems.app;
+          let availableColors = e.detail.newColorArray;
+          let randomNumber = Math.floor(Math.random() * (availableColors.length));
+          app.outOfTime = false;
+          app.colorAsked = availableColors.splice(randomNumber, 1)[0];
+          app.messageText = 'Pick the ' + app.colorAsked + ' square';
+          app.messageClass = 'quiz-message';
+          elems.dashboard.setAttribute('message', app.messageText);
+          elems.message.setAttribute('class', app.messageClass);
+          elems.gameField.setAttribute('number-of-blocks', app.numBlocks);
+        });
+      }
+
+      _judgeResponse(e) {
+        let colorPicked = e.detail.color;
+        this.correct = (colorPicked === this.colorAsked) ? true : false;
+      }
+
+      _getPointsEarned(elems) {
+        let timeLeft = elems.timer.get('currentTime');
+        this.pointsEarned = parseInt(timeLeft * this.multiplier);
+      }
+
+      _setMessage(elems) {
+        let correctMessage = 'Correct! ' + this.pointsEarned + ' points';
+        let incorrectMessage = 'Wrong! -' + this.pointPenalty + ' points';
+        let outOfTimeMessage = 'Time is up! 0 points';
+
+        if (this.correct) {
+          this.messageText = correctMessage;
+          this.messageClass = 'good-message';
+        } else if (this.outOfTime) {
+          this.messageText = outOfTimeMessage;
+          this.messageClass = 'bad-message';
+        } else {
+          this.messageText = incorrectMessage;
+          this.messageClass = 'bad-message';
+        }
+
+        elems.dashboard.setAttribute('message', this.messageText);
+        elems.message.setAttribute('class', this.messageClass);
+      }
+
+      _setTotalPoints(elems) {
+        if (this.correct) {
+          this.totalPoints += this.pointsEarned;
+        } else if (this.outOfTime) {
+          this.totalPoints += 0;
+        } else {
+          this.totalPoints -= this.pointPenalty;
+        }
+
+        elems.dashboard.setAttribute('total-points', this.totalPoints);
+      }
+
+      _turnOffClick(elems) {
+        for (let i = 1, n = elems.baseGameElements.length; i < n; i++) {
+        elems.baseGameElements[i].setAttribute('selection-made', true);
+        }
+      }
+
+      _setGameField(elems) {
+        elems.gameField.setAttribute('number-of-blocks', this.numBlocks);
+        elems.gameField.setUpGameField();
+      }
+
+      _resetGame(elems) {
+        // this._checkAndSetRound(elems);
+        this._emptyGameField(elems);
+        this._setGameField(elems);
+        this._startTimer(elems);
+      }
+
+      _emptyGameField(elems) {
+        elems.gameFieldHTML.innerHTML = '';
+      }
+
+      _pauseAndReset(elems) {
+        setTimeout(function() {
+          elems.app._resetGame(elems);
+        }, elems.app.pauseTime);
+      }
+
+      _startTimer(elems) {
+        elems.timer.reset();
+        elems.timer.start();
+      }
+
+      // _checkAndSetRound(elems) {
+      //   if
+      // }
+
+      _outOfTime(elems) {
+        let app = elems.app;
+        console.log('out of time');
+        app.correct = false;
+        app.outOfTime = true;
+        app._turnOffClick(elems);
+        app.pointsEarned = 0;
+        app._setMessage(elems);
+        app._setTotalPoints(elems);
+        app._pauseAndReset(elems);
+      }
+  }
+
+    window.customElements.define(PjkPickerAppElement.is, PjkPickerAppElement);
+  </script>
+</dom-module>

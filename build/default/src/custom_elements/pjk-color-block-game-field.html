@@ -1,0 +1,52 @@
+<html><head><link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="pjk-color-block.html">
+
+<!--
+`pjk-color-block-game-field`
+colored squares laid out
+-->
+
+</head><body><dom-module id="pjk-color-block-game-field">
+  <template>
+    <style>
+      :host {
+
+      }
+
+      .game-field {
+        width: 820px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+
+    <div class="game-field">
+      <pjk-color-block bg-color="purple"></pjk-color-block>
+      <pjk-color-block bg-color="green"></pjk-color-block>
+      <pjk-color-block bg-color="red"></pjk-color-block>
+      <pjk-color-block bg-color="blue"></pjk-color-block>
+    </div>
+  </template>
+
+  <script>
+    class PjkColorBlockGameField extends Polymer.Element {
+      static get is() {
+        return 'pjk-color-block-game-field';
+      }
+
+      static get properties() {
+        return {
+        };
+      }
+
+      // shuffleColors() {
+      //   let colorArray = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'brown'];
+      //
+      //
+      // }
+    }
+
+    window.customElements.define(PjkColorBlockGameField.is, PjkColorBlockGameField);
+  </script>
+</dom-module>
+</body></html>
