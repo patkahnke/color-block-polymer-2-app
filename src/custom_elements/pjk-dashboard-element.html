@@ -21,7 +21,7 @@ all interaction and game state info for user
         font-size: 40px;
         padding-bottom: 30px;
       }
-      .quiz-message {
+      .neutral-message {
         color: black;
       }
       .good-message {
@@ -35,7 +35,9 @@ all interaction and game state info for user
     <div id="interaction">
       <h1 id="message">[[message]]</h1>
       <simple-timer id="timer" start-time="3"></simple-timer>
-      <span id="score">Total Points:<br>[[totalPoints]]</span>
+      <span id="score">Total Points: [[totalPoints]]</span><br>
+      <span id="play">Question [[playsThisRound]] of [[playsPerRound]]</span><br>
+      <span id="round">Round [[currentRound]] of [[roundsPerGame]]</span>
     </div>
   </template>
 
@@ -47,10 +49,6 @@ all interaction and game state info for user
 
       static get properties() {
         return {
-          gameState: {
-            type: String,
-            value: 'begin'
-          },
           colorPicked: {
             type: String,
           },
@@ -60,7 +58,23 @@ all interaction and game state info for user
           totalPoints: {
             type: Number,
             value: 0,
-          }
+          },
+          currentRound: {
+            type: Number,
+            value: 1,
+          },
+          roundsPerGame: {
+            type: Number,
+            value: 3,
+          },
+          playsThisRound: {
+            type: Number,
+            value: 1,
+          },
+          playsPerRound: {
+            type: Number,
+            value: 10,
+          },
         };
       }
 

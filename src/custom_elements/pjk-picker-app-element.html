@@ -31,6 +31,10 @@ smart component for picker game
             type: Number,
             value: 10,
           },
+          playsThisRound: {
+            type: Number,
+            value: 1,
+          },
           pointPenalty: {
             type: Number,
             value: 300,
@@ -45,7 +49,11 @@ smart component for picker game
           },
           currentRound: {
             type: Number,
-            value: 0,
+            value: 1,
+          },
+          roundsPerGame: {
+            type: Number,
+            value: 3,
           },
           multiplier: {
             type: Number,
@@ -58,6 +66,22 @@ smart component for picker game
           timePerQuestion: {
             type: Number,
             value: 3000,
+          },
+          welcome: {
+            type: Boolean,
+            value: true,
+          },
+          roundOne: {
+            type: Boolean,
+            value: false,
+          },
+          roundTwo: {
+            type: Boolean,
+            value: false,
+          },
+          roundThree: {
+            type: Boolean,
+            value: false,
           },
           messageText: String,
           messageClass: String,
@@ -89,11 +113,23 @@ smart component for picker game
       }
 
       _setUpGame(elems) {
-        this._addColorsSetListener(elems);
-        this._addGetColorListener(elems);
-        this._addTimedOutListener(elems);
-        this._setGameField(elems);
-        this._startTimer(elems);
+        this.welcome = true;
+        this._setMessage(elems);
+        this.welcome = false;
+        this.roundOne = true;
+
+        setTimeout(function() {
+          this.roundOne = false;
+          elems.app._setMessage(elems);
+          setTimeout(function() {
+            elems.app._addColorsSetListener(elems);
+            elems.app._addGetColorListener(elems);
+            elems.app._addTimedOutListener(elems);
+            elems.app._setGameField(elems);
+            elems.app._setRound(elems);
+            elems.app._startTimer(elems);
+          }, elems.app.pauseTime);
+        }, elems.app.pauseTime);
       }
 
       _addGetColorListener(elems) {
@@ -130,6 +166,13 @@ smart component for picker game
         });
       }
 
+      _setRound(elems) {
+        elems.dashboard.setAttribute('current-round', this.currentRound);
+        elems.dashboard.setAttribute('plays-this-round', this.playsThisRound);
+        elems.dashboard.setAttribute('rounds-per-game', this.roundsPerGame);
+        elems.dashboard.setAttribute('plays-per-round', this.playsPerRound);
+      }
+
       _judgeResponse(e) {
         let colorPicked = e.detail.color;
         this.correct = (colorPicked === this.colorAsked) ? true : false;
@@ -141,11 +184,21 @@ smart component for picker game
       }
 
       _setMessage(elems) {
+        let welcomeMessage = 'Welcome to the Color Picker';
+        let roundOneMessage = 'Round One: Confidence Builder';
+        let roundTwoMessage = 'Round Two: Intermediate';
+        let roundThreeMessage = 'Round Three: Challenge!';
         let correctMessage = 'Correct! ' + this.pointsEarned + ' points';
         let incorrectMessage = 'Wrong! -' + this.pointPenalty + ' points';
         let outOfTimeMessage = 'Time is up! 0 points';
 
-        if (this.correct) {
+        if (this.welcome) {
+          this.messageText = welcomeMessage;
+          this.messageClass = 'neutral-message'
+        } else if (this.roundOne) {
+          this.messageText = roundOneMessage;
+          this.messageClass = 'neutral-message'
+        } else if (this.correct) {
           this.messageText = correctMessage;
           this.messageClass = 'good-message';
         } else if (this.outOfTime) {
@@ -184,10 +237,23 @@ smart component for picker game
       }
 
       _resetGame(elems) {
-        // this._checkAndSetRound(elems);
-        this._emptyGameField(elems);
-        this._setGameField(elems);
-        this._startTimer(elems);
+        if ((this.playsThisRound === this.playsPerRound) && (this.currentRound === this.roundsPerGame)) {
+         elems.dashboard.setAttribute('message', 'Game Over');
+         elems.message.setAttribute('class', 'quiz-message');
+        } else if (this.playsThisRound === this.playsPerRound) {
+          this.playsThisRound = 1;
+          this.currentRound++;
+          this._emptyGameField(elems);
+          this._setGameField(elems);
+          this._setRound(elems);
+          this._startTimer(elems);
+        } else {
+          this.playsThisRound++
+          this._emptyGameField(elems);
+          this._setGameField(elems);
+          this._setRound(elems);
+          this._startTimer(elems);
+        }
       }
 
       _emptyGameField(elems) {
@@ -205,13 +271,8 @@ smart component for picker game
         elems.timer.start();
       }
 
-      // _checkAndSetRound(elems) {
-      //   if
-      // }
-
       _outOfTime(elems) {
         let app = elems.app;
-        console.log('out of time');
         app.correct = false;
         app.outOfTime = true;
         app._turnOffClick(elems);
